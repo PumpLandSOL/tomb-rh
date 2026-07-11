@@ -1,0 +1,13 @@
+{
+  "name": "tomb-rh",
+  "version": "1.0.0",
+  "description": "TOMB — a single-token algorithmic peg (Tomb-style) seigniorage protocol on Robinhood Chain.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

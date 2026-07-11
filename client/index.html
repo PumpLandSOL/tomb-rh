@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TOMB — algorithmic peg protocol on Robinhood Chain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Cinzel:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060b06; --panel:rgba(11,22,13,.74); --panel2:rgba(14,28,16,.92);
+  --line:rgba(0,200,5,.16); --line2:rgba(0,200,5,.32);
+  --ink:#eafff0; --sub:#a3cdb0; --mut:#5f8c6f;
+  --pp:#00c805; --pp2:#3dff5c; --violet:#00891c; --gold:#e7c35c; --red:#ff6b9d; --good:#7ad6a8;
+  --grad:linear-gradient(135deg,#00c805,#3dff5c);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Poppins',system-ui,sans-serif;color:var(--ink);background:var(--bg);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ---------- graveyard background ---------- */
+.bg{position:fixed;inset:0;z-index:-3;background:
+  radial-gradient(60% 50% at 50% 4%,rgba(0,200,5,.13),transparent 60%),
+  radial-gradient(80% 60% at 50% 120%,rgba(61,255,92,.09),transparent 60%),
+  linear-gradient(180deg,#050a06 0%,#081408 36%,#040904 100%)}
+.bg .moon{position:absolute;top:3%;right:11%;width:122px;height:122px;border-radius:50%;
+  background:radial-gradient(circle at 38% 34%,#eaffee,#a8f5c0 46%,#3e8a5c 78%,transparent);
+  box-shadow:0 0 140px 42px rgba(0,200,5,.22);opacity:.72;filter:saturate(.9)}
+.bg .scene{position:absolute;bottom:0;left:0;width:100%;height:46vh;min-height:340px}
+.bg .fog{position:absolute;left:0;width:200%;height:160px;background:radial-gradient(closest-side,rgba(120,230,140,.10),transparent 70%);filter:blur(8px)}
+.bg .f1{bottom:18vh;animation:drift 46s linear infinite}
+.bg .f2{bottom:6vh;animation:drift 64s linear infinite reverse;opacity:.7}
+@keyframes drift{from{transform:translateX(-25%)}to{transform:translateX(0%)}}
+.vig{position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(120% 90% at 50% 30%,transparent 55%,rgba(2,9,4,.84))}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header{position:sticky;top:0;z-index:40;backdrop-filter:blur(10px);background:linear-gradient(180deg,rgba(6,16,8,.88),rgba(6,16,8,.5) 70%,transparent);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:26px;height:70px}
+.brand{display:flex;align-items:center;gap:11px;font-family:'Cinzel',serif;font-weight:900;font-size:22px;letter-spacing:2px}
+.coin{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:17px;color:#03230a;
+  background:var(--grad);box-shadow:0 0 20px rgba(0,200,5,.55),inset 0 -3px 8px rgba(0,0,0,.3);border:1.5px solid rgba(255,255,255,.35)}
+.brand b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.links{display:flex;gap:6px;margin-left:8px}
+.links a{font-size:14px;font-weight:600;color:var(--sub);text-decoration:none;padding:8px 13px;border-radius:9px;cursor:pointer;transition:.15s}
+.links a:hover{color:var(--ink);background:rgba(0,200,5,.07)}
+.links a.on{color:var(--pp2);background:rgba(0,200,5,.12);box-shadow:inset 0 0 0 1px var(--line2)}
+.right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.ico{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;color:var(--sub);border:1px solid var(--line);background:rgba(255,255,255,.02);cursor:pointer;text-decoration:none;font-size:15px}
+.ico:hover{color:var(--pp2);border-color:var(--line2)}
+.btn{font-family:'Poppins';font-weight:700;font-size:14px;border:none;cursor:pointer;border-radius:10px;padding:11px 18px;color:#03230a;background:var(--grad);box-shadow:0 6px 22px rgba(0,200,5,.34);transition:.15s}
+.btn:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.btn.ghost{background:transparent;color:var(--pp2);box-shadow:inset 0 0 0 1.5px var(--line2)}
+.btn.sm{padding:9px 14px;font-size:13px}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn.wide{width:100%}
+
+main{padding:34px 0 80px;position:relative;z-index:1}
+.page{display:none}.page.on{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* hero */
+.hero{text-align:center;padding:8px 0 30px}
+.kick{font-family:'Poppins';font-size:12.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--pp2);font-weight:600}
+.hero h1{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(40px,6.4vw,72px);line-height:1.02;margin:12px 0 10px;letter-spacing:1px;text-shadow:0 0 50px rgba(0,200,5,.3)}
+.hero h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--sub);font-size:16px;max-width:600px;margin:0 auto;line-height:1.6}
+.three{display:inline-flex;gap:7px;margin-top:16px;font-family:'Cinzel';font-weight:700;font-size:13px;color:var(--gold);
+  background:rgba(231,195,92,.07);border:1px solid rgba(231,195,92,.28);padding:8px 16px;border-radius:999px;letter-spacing:.5px}
+
+/* cards / panels */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(8px);box-shadow:0 18px 50px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.03)}
+.statrow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:26px 0}
+.stat{padding:18px;border-radius:14px;background:var(--panel);border:1px solid var(--line);position:relative;overflow:hidden}
+.stat::before{content:"";position:absolute;left:0;top:0;width:100%;height:2px;background:var(--grad);opacity:.55}
+.stat .l{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.stat .v{font-family:'Cinzel';font-weight:700;font-size:27px;margin-top:7px;letter-spacing:.5px}
+.stat .v small{font-size:14px;color:var(--sub);font-family:'Poppins';font-weight:500}
+.pegpill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;margin-top:6px}
+.pegpill.above{color:var(--good);background:rgba(122,214,168,.12);border:1px solid rgba(122,214,168,.3)}
+.pegpill.below{color:var(--red);background:rgba(255,107,157,.12);border:1px solid rgba(255,107,157,.3)}
+.pegpill .dt{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.tk{padding:24px;border-radius:16px}
+.tk .top{display:flex;align-items:center;gap:12px}
+.tk .bc{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-family:'Cinzel';font-weight:800;font-size:17px;color:#03230a;border:1.5px solid rgba(255,255,255,.3);box-shadow:inset 0 -3px 8px rgba(0,0,0,.28)}
+.bc.tomb{background:var(--grad)}.bc.tre{background:linear-gradient(135deg,#e7c35c,#caa23a);color:#2a200a;font-size:20px}
+.tk .nm{font-family:'Cinzel';font-weight:700;font-size:19px}.tk .tg{font-size:12px;color:var(--mut)}
+.tk .px{font-family:'Cinzel';font-weight:700;font-size:31px;margin:16px 0 2px}
+.kv{display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-top:1px solid var(--line);color:var(--sub)}
+.kv b{color:var(--ink);font-weight:600}
+.assets{display:flex;gap:7px;margin-top:4px}
+.asset{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--sub);background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:999px;padding:5px 11px}
+.asset .d{width:15px;height:15px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:800;color:#0a060f}
+.asset .eth{background:linear-gradient(135deg,#00c805,#3dff5c)}.asset .usdc{background:#2775ca;color:#fff}
+
+.invest{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.ic{padding:26px;border-radius:18px}
+.ic h3{font-family:'Cinzel';font-weight:700;font-size:22px;margin-bottom:6px}
+.ic p{color:var(--sub);font-size:14px;line-height:1.55;margin-bottom:18px}
+.ic .apr{font-family:'Cinzel';font-weight:800;font-size:34px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ic .apl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.12em}
+
+/* section heads */
+.shead{text-align:center;margin:6px 0 22px}
+.shead h2{font-family:'Cinzel';font-weight:800;font-size:34px;margin-top:8px;letter-spacing:1px}
+.shead p{color:var(--sub);font-size:14.5px;max-width:560px;margin:10px auto 0;line-height:1.6}
+
+/* mausoleum / epoch clock */
+.clock{display:flex;flex-direction:column;align-items:center;padding:30px;border-radius:20px;margin-bottom:18px;position:relative;overflow:hidden;
+  background:radial-gradient(120% 130% at 50% -20%,rgba(0,200,5,.18),transparent 60%),var(--panel2);border:1px solid var(--line2)}
+.clock .cl{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--pp2);font-weight:600}
+.clock .cv{font-family:'Cinzel';font-weight:800;font-size:clamp(46px,9vw,74px);letter-spacing:4px;line-height:1;margin:10px 0 6px;text-shadow:0 0 40px rgba(0,200,5,.4)}
+.clock .ce{color:var(--sub);font-size:13.5px}.clock .ce b{color:var(--ink)}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.box{padding:22px;border-radius:16px}
+.tabs{display:flex;gap:6px;background:rgba(0,0,0,.32);border:1px solid var(--line);border-radius:11px;padding:5px;margin-bottom:16px}
+.tabs button{flex:1;background:transparent;border:none;color:var(--sub);font-family:'Poppins';font-weight:600;font-size:14px;padding:9px;border-radius:8px;cursor:pointer}
+.tabs button.on{background:var(--grad);color:#03230a}
+.field{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.34);border:1px solid var(--line);border-radius:12px;padding:6px 6px 6px 16px;margin-bottom:14px}
+.field input{flex:1;background:none;border:none;outline:none;color:var(--ink);font-family:'Poppins';font-weight:600;font-size:17px}
+.field .max{font-size:11px;font-weight:700;color:var(--pp2);background:rgba(0,200,5,.12);border:1px solid var(--line2);border-radius:7px;padding:6px 10px;cursor:pointer}
+.field .tk2{font-family:'Cinzel';font-weight:700;color:var(--sub);font-size:14px;padding-right:6px}
+.bal{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mut);margin-bottom:14px}
+.bal b{color:var(--ink)}
+
+/* bonds */
+.bonds{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.bond{padding:24px;border-radius:18px}
+.bond .bt{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.bond .ba{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:800;color:#fff}
+.bond .ba.eth{background:linear-gradient(135deg,#00c805,#3dff5c);color:#03230a}
+.bond .ba.usdc{background:#2775ca}
+.bond .bn{font-family:'Cinzel';font-weight:700;font-size:18px}
+.bond .bd{font-family:'Cinzel';font-weight:800;font-size:30px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;margin:12px 0 0}
+.bond .bl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.12em}
+.yourbonds{margin-top:8px}
+.vb{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:13px;background:var(--panel);border:1px solid var(--line);margin-bottom:10px}
+.vb .vbar{flex:1;height:7px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}
+.vb .vbar i{display:block;height:100%;background:var(--grad)}
+.note{font-size:12.5px;color:var(--mut);line-height:1.55;margin-top:6px;text-align:center}
+
+/* CA + disclaimer */
+.ca{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:30px auto 0;max-width:760px;padding:14px 18px;border-radius:13px;background:var(--panel);border:1px solid var(--line)}
+.ca .t{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.14em;font-weight:600}
+.ca code{font-family:ui-monospace,monospace;font-size:13px;color:var(--pp2);word-break:break-all}
+.ca button{font-size:12px;font-weight:700;border:1px solid var(--line2);background:rgba(0,200,5,.1);color:var(--pp2);border-radius:8px;padding:7px 12px;cursor:pointer}
+.disc{max-width:820px;margin:26px auto 0;padding:18px 22px;border-radius:13px;border:1px solid rgba(231,195,92,.2);background:rgba(231,195,92,.05);color:#cdbd92;font-size:12.5px;line-height:1.6}
+.disc b{color:var(--gold)}
+footer{text-align:center;color:var(--mut);font-size:12.5px;padding:30px 0 10px}
+
+/* wallet modal + toast */
+.modal{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(2,9,4,.72);backdrop-filter:blur(4px)}
+.modal.on{display:flex}
+.mcard{width:min(420px,92vw);padding:26px;border-radius:18px;background:var(--panel2);border:1px solid var(--line2);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.mcard h3{font-family:'Cinzel';font-weight:700;font-size:20px;margin-bottom:6px}
+.mcard p{color:var(--sub);font-size:13px;line-height:1.5;margin-bottom:16px}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);z-index:90;background:var(--panel2);border:1px solid var(--line2);color:var(--ink);font-size:14px;font-weight:600;padding:13px 22px;border-radius:12px;opacity:0;transition:.3s;pointer-events:none;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{border-color:rgba(255,107,157,.4);color:#ffd0e0}
+
+@media(max-width:860px){
+  .statrow{grid-template-columns:1fr 1fr}.dgrid{grid-template-columns:1fr}.invest{grid-template-columns:1fr}
+  .mgrid{grid-template-columns:1fr}.bonds{grid-template-columns:1fr}.links{display:none}
+}
+</style>
+</head>
+<body>
+<div class="bg">
+  <div class="moon"></div>
+  <div class="fog f1"></div><div class="fog f2"></div>
+  <svg class="scene" viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c1f12"/><stop offset="1" stop-color="#040a05"/></linearGradient>
+      <linearGradient id="hill2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#122b18"/><stop offset="1" stop-color="#071106"/></linearGradient>
+    </defs>
+    <path d="M0 240 Q360 150 720 220 T1440 210 V420 H0 Z" fill="url(#hill2)" opacity=".8"/>
+    <path d="M0 320 Q300 250 620 300 T1440 290 V420 H0 Z" fill="url(#hill)"/>
+    <g fill="#08140a" opacity=".95">
+      <rect x="640" y="170" width="160" height="150"/>
+      <polygon points="630,170 720,110 810,170"/>
+      <rect x="700" y="240" width="40" height="80"/>
+      <rect x="660" y="200" width="22" height="34"/><rect x="758" y="200" width="22" height="34"/>
+    </g>
+    <g fill="#0e2112">
+      <path d="M120 320 v-44 a22 22 0 0 1 44 0 v44 Z"/>
+      <path d="M210 320 v-58 a18 18 0 0 1 36 0 v58 Z"/>
+      <rect x="300" y="276" width="34" height="44"/>
+      <path d="M980 320 v-50 a20 20 0 0 1 40 0 v50 Z"/>
+      <rect x="1060" y="284" width="30" height="36"/>
+      <path d="M1150 320 v-40 a16 16 0 0 1 32 0 v40 Z"/>
+      <path d="M1260 320 v-54 a20 20 0 0 1 40 0 v54 Z"/>
+      <g fill="#0a1a0c"><rect x="430" y="262" width="9" height="58"/><rect x="418" y="276" width="33" height="9"/></g>
+      <g fill="#0a1a0c"><rect x="860" y="270" width="8" height="50"/><rect x="850" y="282" width="28" height="8"/></g>
+    </g>
+    <g stroke="#0a1a0c" stroke-width="6" fill="none" opacity=".9">
+      <path d="M540 320 V210 M540 250 l-26 -30 M540 240 l26 -34 M540 220 l-18 -26 M540 226 l20 -22"/>
+    </g>
+  </svg>
+</div>
+<div class="vig"></div>
+
+<header><div class="wrap"><nav class="nav">
+  <div class="brand"><div class="coin">⚰</div><b>TOMB</b></div>
+  <div class="links">
+    <a data-pg="dash" class="on">Dashboard</a>
+    <a data-pg="maus">Mausoleum</a>
+    <a data-pg="bond">Bond</a>
+  </div>
+  <div class="right">
+    <a class="ico" id="xbtn" href="https://x.com/TOMBOnRH" target="_blank" rel="noopener" title="X" aria-label="X">𝕏</a>
+    <button class="btn sm" id="connect">Connect Wallet</button>
+  </div>
+</nav></div></header>
+
+<main class="wrap">
+
+  <!-- ============ DASHBOARD ============ -->
+  <section class="page on" id="pg-dash">
+    <div class="hero">
+      <div class="kick">Algorithmic peg · Robinhood Chain</div>
+      <h1>Stake. Earn the <span class="g">expansion.</span></h1>
+      <p><b style="color:#eafff0">$TOMB</b> targets a 1 ETH peg. Every epoch it trades above peg, the protocol expands — and the new TOMB is paid to everyone staking in the Mausoleum. One token. Backed by ETH &amp; USDC.</p>
+      <div class="three">◈ &nbsp;(3,3) &nbsp;— &nbsp;if we all stake, we all win</div>
+    </div>
+
+    <div class="statrow">
+      <div class="stat"><div class="l">Current Epoch</div><div class="v" id="d-epoch">—</div></div>
+      <div class="stat"><div class="l">Next Epoch</div><div class="v" id="d-next">—:—</div></div>
+      <div class="stat"><div class="l">TOMB TWAP</div><div class="v" id="d-twap">—<small> ETH</small></div><span class="pegpill below" id="d-peg"><span class="dt"></span>—</span></div>
+      <div class="stat"><div class="l">Total Value Locked</div><div class="v" id="d-tvl">—</div></div>
+    </div>
+
+    <div class="dgrid">
+      <div class="tk panel"><div class="top"><div class="bc tomb">T</div><div><div class="nm">$TOMB</div><div class="tg">Peg token · targets 1 ETH</div></div></div>
+        <div class="px" id="t-tomb">$—</div>
+        <div class="kv"><span>Price in ETH</span><b id="t-tombsol">—</b></div>
+        <div class="kv"><span>Market cap</span><b id="t-tombmc">—</b></div>
+        <div class="kv"><span>Circulating supply</span><b id="t-tombsup">—</b></div>
+        <div class="kv"><span>Backing per TOMB</span><b id="t-tombback">—</b></div>
+      </div>
+      <div class="tk panel"><div class="top"><div class="bc tre">🏛</div><div><div class="nm">Treasury</div><div class="tg">Protocol-owned reserves</div></div></div>
+        <div class="px" id="t-treas">$—</div>
+        <div class="assets"><span class="asset"><span class="d eth">Ξ</span>ETH</span><span class="asset"><span class="d usdc">$</span>USDC</span></div>
+        <div class="kv" style="margin-top:8px"><span>Backs every $TOMB</span><b>protocol-owned</b></div>
+        <div class="kv"><span>Runway</span><b id="t-runway">—</b></div>
+        <div class="kv"><span>Bond it grows with</span><b>ETH · USDC</b></div>
+      </div>
+    </div>
+
+    <div class="invest">
+      <div class="ic panel"><div class="apl">Mausoleum</div><div class="apr" id="i-maus">—%</div>
+        <h3>Stake $TOMB</h3><p>Stake TOMB and collect newly-expanded $TOMB every epoch the protocol is above peg. The more is staked, the stronger the peg.</p>
+        <button class="btn" data-pg="maus">Enter the Mausoleum →</button>
+      </div>
+      <div class="ic panel"><div class="apl">Bonds · best discount</div><div class="apr" id="i-bond">—%</div>
+        <h3>Bond ETH or USDC</h3><p>Trade real ETH or USDC for discounted $TOMB that vests over 5 days. Your deposit grows the treasury that backs every token.</p>
+        <button class="btn" data-pg="bond">Open a Bond →</button>
+      </div>
+    </div>
+
+    <div class="ca" id="cabar" style="display:none">
+      <span class="t">$TOMB CA</span><code id="ca-mint"></code><button id="ca-copy">Copy</button>
+    </div>
+    <div class="disc">
+      <b>How this works (read me).</b> $TOMB is a plain Pump.fun SPL token (fixed supply, mint authority revoked) — so "expansion" here is paid as <b>emissions from a finite reserve, not real minting</b>. Staking, bonding and the treasury run on an <b>off-chain ledger</b>; rewards settle by <b>scripted airdrop</b>. The TWAP/peg shown is simulated for the app until a live pool oracle is wired. Algorithmic peg models are <b>high-risk and most have failed</b> — only stake what you can lose. Trustless on-chain settlement (audited programs) is the planned upgrade.
+    </div>
+  </section>
+
+  <!-- ============ MAUSOLEUM ============ -->
+  <section class="page" id="pg-maus">
+    <div class="shead"><span class="kick">The Boardroom</span><h2>Mausoleum</h2>
+      <p>Stake $TOMB, collect $TOMB. Every epoch above peg, the protocol's expansion is paid to stakers here.</p></div>
+    <div class="clock panel">
+      <div class="cl">Next Seigniorage Epoch</div>
+      <div class="cv" id="m-clock">--:--</div>
+      <div class="ce">Epoch <b id="m-epoch">—</b> · last expansion <b id="m-exp">—</b></div>
+    </div>
+    <div class="mgrid">
+      <div class="stat"><div class="l">Mausoleum APR</div><div class="v" id="m-apr">—%</div></div>
+      <div class="stat"><div class="l">Your Staked TOMB</div><div class="v" id="m-staked">—</div></div>
+      <div class="stat"><div class="l">TOMB to Claim</div><div class="v" id="m-earned">—</div></div>
+    </div>
+    <div class="box panel" style="max-width:540px;margin:0 auto">
+      <div class="tabs"><button class="on" id="mt-stake">Stake</button><button id="mt-wd">Withdraw</button></div>
+      <div class="field"><input id="min" type="number" placeholder="0.0" min="0"><span class="tk2">TOMB</span><span class="max" id="m-max">MAX</span></div>
+      <div class="bal"><span id="m-ball">TOMB balance</span><b id="m-bal">—</b></div>
+      <button class="btn wide" id="m-act" style="margin-bottom:12px">Stake TOMB</button>
+      <button class="btn ghost wide" id="m-claim">Claim <span id="m-claimv">—</span> TOMB</button>
+    </div>
+  </section>
+
+  <!-- ============ BOND ============ -->
+  <section class="page" id="pg-bond">
+    <div class="shead"><span class="kick">Grow the treasury</span><h2>Bonds</h2>
+      <p>Deposit real ETH or USDC and receive $TOMB at a discount, vesting over 5 days. Your deposit becomes protocol-owned reserves that back every token.</p></div>
+    <div class="bonds" id="bondgrid"></div>
+
+    <div class="box panel" style="max-width:540px;margin:0 auto" id="bondform">
+      <div class="bal"><span>Bonding</span><b id="bf-name">ETH</b></div>
+      <div class="field"><input id="bin" type="number" placeholder="0.0" min="0"><span class="tk2" id="bf-cur">ETH</span><span class="max" id="bf-max">MAX</span></div>
+      <div class="bal"><span>Discount</span><b id="bf-disc">—</b></div>
+      <div class="bal"><span>You receive (vests 5d)</span><b id="bf-out">— TOMB</b></div>
+      <button class="btn wide" id="bf-buy">Bond</button>
+    </div>
+
+    <div class="yourbonds" id="yourbonds" style="max-width:540px;margin:18px auto 0"></div>
+    <p class="note">Bonds are how the protocol owns its liquidity — your ETH/USDC isn't a counterparty's, it's the treasury's. Claim your vested TOMB any time, or claim &amp; auto-stake it straight into the Mausoleum.</p>
+  </section>
+
+</main>
+
+<footer><div class="wrap">TOMB · an algorithmic reserve experiment on Robinhood Chain · backed by ETH &amp; USDC · (3,3)</div></footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="/client/src/app.js"></script>
+</body>
+</html>

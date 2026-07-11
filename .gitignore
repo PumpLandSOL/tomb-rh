@@ -1,0 +1,6 @@
+node_modules/
+data.json
+_*.js
+_*.html
+_*.png
+.DS_Store

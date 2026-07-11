@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: tomb-rh
+    runtime: node
+    plan: free
+    buildCommand: ""
+    startCommand: node server/index.js
+    autoDeploy: true
+    envVars:
+      - key: EPOCH_SEC
+        value: "600"
